@@ -15,7 +15,7 @@ public class Propiedades {
     private String nombreInmueble;
 
     @Column(name = "areaInmueble", nullable = false)
-    private boolean areaInmueble;
+    private double areaInmueble;
 
     @Column(name = "direccionInmueble", nullable = false, length = 100)
     private String direccionInmueble;
@@ -25,12 +25,12 @@ public class Propiedades {
 
     @ManyToOne
     @JoinColumn(name = "clientes_cliente_id",nullable = false)
-    private Usuarios clientes_cliente_id;
+    private Clientes clientes_cliente_id;
 
     public Propiedades() {
     }
 
-    public Propiedades(int inmueble_id, String nombreInmueble, boolean areaInmueble, String direccionInmueble, double precioInmueble, Usuarios clientes_cliente_id) {
+    public Propiedades(int inmueble_id, String nombreInmueble, double areaInmueble, String direccionInmueble, double precioInmueble, Clientes clientes_cliente_id) {
         this.inmueble_id = inmueble_id;
         this.nombreInmueble = nombreInmueble;
         this.areaInmueble = areaInmueble;
@@ -55,11 +55,11 @@ public class Propiedades {
         this.nombreInmueble = nombreInmueble;
     }
 
-    public boolean isAreaInmueble() {
+    public double isAreaInmueble() {
         return areaInmueble;
     }
 
-    public void setAreaInmueble(boolean areaInmueble) {
+    public void setAreaInmueble(double areaInmueble) {
         this.areaInmueble = areaInmueble;
     }
 
@@ -79,11 +79,11 @@ public class Propiedades {
         this.precioInmueble = precioInmueble;
     }
 
-    public Usuarios getClientes_cliente_id() {
+    public Clientes getClientes_cliente_id() {
         return clientes_cliente_id;
     }
 
-    public void setClientes_cliente_id(Usuarios clientes_cliente_id) {
+    public void setClientes_cliente_id(Clientes clientes_cliente_id) {
         this.clientes_cliente_id = clientes_cliente_id;
     }
 }
