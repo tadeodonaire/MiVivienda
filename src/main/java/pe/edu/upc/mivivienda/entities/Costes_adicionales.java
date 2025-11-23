@@ -1,5 +1,6 @@
 package pe.edu.upc.mivivienda.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -7,9 +8,8 @@ import jakarta.persistence.*;
 public class Costes_adicionales {
 
     @Id
-    @Column(name = "Simulaciones_simulacion_id")
-    // No uso @GeneratedValue porque en el ER esta PK también es FK a Simulaciones
-    private int simulaciones_simulacion_id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int costesAdicional_id;
 
     @Column(name = "nombreCosto", nullable = false, length = 50)
     private String nombreCosto;
@@ -17,19 +17,25 @@ public class Costes_adicionales {
     @Column(name = "valor", nullable = false)
     private double valor;
 
+    @JsonIgnore
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "Simulaciones_simulacion_id")
+    private Simulaciones simulaciones_simulacion_id;
+
     public Costes_adicionales() {}
 
-    public Costes_adicionales(int simulaciones_simulacion_id, String nombreCosto, double valor) {
-        this.simulaciones_simulacion_id = simulaciones_simulacion_id;
+    public Costes_adicionales(int costesAdicional_id, String nombreCosto, double valor, Simulaciones simulaciones_simulacion_id) {
+        this.costesAdicional_id = costesAdicional_id;
         this.nombreCosto = nombreCosto;
         this.valor = valor;
+        this.simulaciones_simulacion_id = simulaciones_simulacion_id;
     }
 
-    public int getSimulaciones_simulacion_id() {
+    public Simulaciones getSimulaciones_simulacion_id() {
         return simulaciones_simulacion_id;
     }
 
-    public void setSimulaciones_simulacion_id(int simulaciones_simulacion_id) {
+    public void setSimulaciones_simulacion_id(Simulaciones simulaciones_simulacion_id) {
         this.simulaciones_simulacion_id = simulaciones_simulacion_id;
     }
 
@@ -47,6 +53,14 @@ public class Costes_adicionales {
 
     public void setValor(double valor) {
         this.valor = valor;
+    }
+
+    public int getCostesAdicional_id() {
+        return costesAdicional_id;
+    }
+
+    public void setCostesAdicional_id(int costesAdicional_id) {
+        this.costesAdicional_id = costesAdicional_id;
     }
 }
 

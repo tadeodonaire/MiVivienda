@@ -1,14 +1,14 @@
 package pe.edu.upc.mivivienda.dtos;
 
-import pe.edu.upc.mivivienda.entities.Usuarios;
+import pe.edu.upc.mivivienda.entities.Clientes;
 
 public class PropiedadesDTO {
     private int inmueble_id;
     private String nombreInmueble;
-    private boolean areaInmueble;
+    private double areaInmueble;
     private String direccionInmueble;
     private double precioInmueble;
-    private Usuarios clientes_cliente_id;
+    private Clientes clientes_cliente_id;
 
     public int getInmueble_id() {
         return inmueble_id;
@@ -26,11 +26,11 @@ public class PropiedadesDTO {
         this.nombreInmueble = nombreInmueble;
     }
 
-    public boolean isAreaInmueble() {
+    public double isAreaInmueble() {
         return areaInmueble;
     }
 
-    public void setAreaInmueble(boolean areaInmueble) {
+    public void setAreaInmueble(double areaInmueble) {
         this.areaInmueble = areaInmueble;
     }
 
@@ -50,11 +50,11 @@ public class PropiedadesDTO {
         this.precioInmueble = precioInmueble;
     }
 
-    public Usuarios getClientes_cliente_id() {
+    public Clientes getClientes_cliente_id() {
         return clientes_cliente_id;
     }
 
-    public void setClientes_cliente_id(Usuarios clientes_cliente_id) {
+    public void setClientes_cliente_id(Clientes clientes_cliente_id) {
         this.clientes_cliente_id = clientes_cliente_id;
     }
 }
