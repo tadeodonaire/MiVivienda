@@ -3,7 +3,12 @@ package pe.edu.upc.mivivienda.dtos;
 public class Entidades_financierasDTO {
     private int entidadFinanciera_id;
     private String nombre;
-    private double TEA;
+    private double TEAmin;
+    private double TEAmax;
+    private double precioMin;
+    private double precioMax;
+    private int plazoMax;
+    private int plazoMin;
     private double seguroDesgravamen;
     private double seguroInmueble;
 
@@ -23,12 +28,52 @@ public class Entidades_financierasDTO {
         this.nombre = nombre;
     }
 
-    public double getTEA() {
-        return TEA;
+    public double getTEAmin() {
+        return TEAmin;
     }
 
-    public void setTEA(double TEA) {
-        this.TEA = TEA;
+    public void setTEAmin(double TEAmin) {
+        this.TEAmin = TEAmin;
+    }
+
+    public double getTEAmax() {
+        return TEAmax;
+    }
+
+    public void setTEAmax(double TEAmax) {
+        this.TEAmax = TEAmax;
+    }
+
+    public double getPrecioMin() {
+        return precioMin;
+    }
+
+    public void setPrecioMin(double precioMin) {
+        this.precioMin = precioMin;
+    }
+
+    public double getPrecioMax() {
+        return precioMax;
+    }
+
+    public void setPrecioMax(double precioMax) {
+        this.precioMax = precioMax;
+    }
+
+    public int getPlazoMax() {
+        return plazoMax;
+    }
+
+    public void setPlazoMax(int plazoMax) {
+        this.plazoMax = plazoMax;
+    }
+
+    public int getPlazoMin() {
+        return plazoMin;
+    }
+
+    public void setPlazoMin(int plazoMin) {
+        this.plazoMin = plazoMin;
     }
 
     public double getSeguroDesgravamen() {
