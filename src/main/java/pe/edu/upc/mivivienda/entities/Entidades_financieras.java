@@ -12,8 +12,23 @@ public class Entidades_financieras {
     @Column(name = "nombre", nullable = false, length = 25)
     private String nombre;
 
-    @Column(name = "TEA", nullable = false)
-    private double TEA;
+    @Column(name = "TEAmin", nullable = false)
+    private double TEAmin;
+
+    @Column(name = "TEAmax", nullable = false)
+    private double TEAmax;
+
+    @Column(name = "precioMin", nullable = false)
+    private double precioMin;
+
+    @Column(name = "precioMax", nullable = false)
+    private double precioMax;
+
+    @Column(name = "plazoMax", nullable = false)
+    private int plazoMax;
+
+    @Column(name = "plazoMin", nullable = false)
+    private int plazoMin;
 
     @Column(name = "seguroDesgravamen", nullable = false)
     private double seguroDesgravamen;
@@ -23,10 +38,15 @@ public class Entidades_financieras {
 
     public Entidades_financieras() {}
 
-    public Entidades_financieras(int entidadFinanciera_id, String nombre, double TEA, double seguroDesgravamen, double seguroInmueble) {
+    public Entidades_financieras(int entidadFinanciera_id, String nombre, double TEAmin, double TEAmax, double precioMin, double precioMax, int plazoMax, int plazoMin, double seguroDesgravamen, double seguroInmueble) {
         this.entidadFinanciera_id = entidadFinanciera_id;
         this.nombre = nombre;
-        this.TEA = TEA;
+        this.TEAmin = TEAmin;
+        this.TEAmax = TEAmax;
+        this.precioMin = precioMin;
+        this.precioMax = precioMax;
+        this.plazoMax = plazoMax;
+        this.plazoMin = plazoMin;
         this.seguroDesgravamen = seguroDesgravamen;
         this.seguroInmueble = seguroInmueble;
     }
@@ -47,12 +67,52 @@ public class Entidades_financieras {
         this.nombre = nombre;
     }
 
-    public double getTEA() {
-        return TEA;
+    public double getTEAmin() {
+        return TEAmin;
     }
 
-    public void setTEA(double TEA) {
-        this.TEA = TEA;
+    public void setTEAmin(double TEAmin) {
+        this.TEAmin = TEAmin;
+    }
+
+    public double getTEAmax() {
+        return TEAmax;
+    }
+
+    public void setTEAmax(double TEAmax) {
+        this.TEAmax = TEAmax;
+    }
+
+    public double getPrecioMin() {
+        return precioMin;
+    }
+
+    public void setPrecioMin(double precioMin) {
+        this.precioMin = precioMin;
+    }
+
+    public double getPrecioMax() {
+        return precioMax;
+    }
+
+    public void setPrecioMax(double precioMax) {
+        this.precioMax = precioMax;
+    }
+
+    public int getPlazoMax() {
+        return plazoMax;
+    }
+
+    public void setPlazoMax(int plazoMax) {
+        this.plazoMax = plazoMax;
+    }
+
+    public int getPlazoMin() {
+        return plazoMin;
+    }
+
+    public void setPlazoMin(int plazoMin) {
+        this.plazoMin = plazoMin;
     }
 
     public double getSeguroDesgravamen() {
