@@ -3,7 +3,7 @@ package pe.edu.upc.mivivienda.servicesimplements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pe.edu.upc.mivivienda.entities.Simulacion_Cronograma;
-import pe.edu.upc.mivivienda.repositories.Simulacion_CronogramaRepository;
+import pe.edu.upc.mivivienda.repositories.ISimulacion_CronogramaRepository;
 import pe.edu.upc.mivivienda.servicesinterfaces.Simulacion_CronogramaService;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.List;
 @Service
 public class Simulacion_CronogramaServiceImplement implements Simulacion_CronogramaService {
     @Autowired
-    private Simulacion_CronogramaRepository scR;
+    private ISimulacion_CronogramaRepository scR;
 
     @Override
     public void insert(Simulacion_Cronograma simulacion_cronograma) {
