@@ -1,8 +1,12 @@
 package pe.edu.upc.mivivienda.dtos;
 
+import jakarta.persistence.Column;
+
 public class Entidades_financierasDTO {
     private int entidadFinanciera_id;
     private String nombre;
+    private double valorCotizacionMax;
+    private double cuotaInicialMin;
     private double TEAmin;
     private double TEAmax;
     private double precioMin;
@@ -26,6 +30,22 @@ public class Entidades_financierasDTO {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public double getValorCotizacionMax() {
+        return valorCotizacionMax;
+    }
+
+    public void setValorCotizacionMax(double valorCotizacionMax) {
+        this.valorCotizacionMax = valorCotizacionMax;
+    }
+
+    public double getCuotaInicialMin() {
+        return cuotaInicialMin;
+    }
+
+    public void setCuotaInicialMin(double cuotaInicialMin) {
+        this.cuotaInicialMin = cuotaInicialMin;
     }
 
     public double getTEAmin() {

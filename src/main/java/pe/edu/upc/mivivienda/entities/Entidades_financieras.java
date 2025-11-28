@@ -12,6 +12,12 @@ public class Entidades_financieras {
     @Column(name = "nombre", nullable = false, length = 25)
     private String nombre;
 
+    @Column(name = "valorCotizacionMax")
+    private double valorCotizacionMax;
+
+    @Column(name = "cuotaInicialMin")
+    private double cuotaInicialMin;
+
     @Column(name = "TEAmin", nullable = false)
     private double TEAmin;
 
@@ -38,9 +44,11 @@ public class Entidades_financieras {
 
     public Entidades_financieras() {}
 
-    public Entidades_financieras(int entidadFinanciera_id, String nombre, double TEAmin, double TEAmax, double precioMin, double precioMax, int plazoMax, int plazoMin, double seguroDesgravamen, double seguroInmueble) {
+    public Entidades_financieras(int entidadFinanciera_id, String nombre, double valorCotizacionMax, double cuotaInicialMin, double TEAmin, double TEAmax, double precioMin, double precioMax, int plazoMax, int plazoMin, double seguroDesgravamen, double seguroInmueble) {
         this.entidadFinanciera_id = entidadFinanciera_id;
         this.nombre = nombre;
+        this.valorCotizacionMax = valorCotizacionMax;
+        this.cuotaInicialMin = cuotaInicialMin;
         this.TEAmin = TEAmin;
         this.TEAmax = TEAmax;
         this.precioMin = precioMin;
@@ -65,6 +73,22 @@ public class Entidades_financieras {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public double getValorCotizacionMax() {
+        return valorCotizacionMax;
+    }
+
+    public void setValorCotizacionMax(double valorCotizacionMax) {
+        this.valorCotizacionMax = valorCotizacionMax;
+    }
+
+    public double getCuotaInicialMin() {
+        return cuotaInicialMin;
+    }
+
+    public void setCuotaInicialMin(double cuotaInicialMin) {
+        this.cuotaInicialMin = cuotaInicialMin;
     }
 
     public double getTEAmin() {
