@@ -26,7 +26,7 @@ public class PropiedadesDTO {
         this.nombreInmueble = nombreInmueble;
     }
 
-    public double isAreaInmueble() {
+    public double getAreaInmueble() {
         return areaInmueble;
     }
 
