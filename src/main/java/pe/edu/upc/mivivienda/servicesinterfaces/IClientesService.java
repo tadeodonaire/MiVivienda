@@ -1,5 +1,6 @@
 package pe.edu.upc.mivivienda.servicesinterfaces;
 
+import org.springframework.data.repository.query.Param;
 import pe.edu.upc.mivivienda.entities.Clientes;
 
 import java.util.List;
@@ -15,4 +16,7 @@ public interface IClientesService {
     public void delete(int id);
     //ListarId
     public Clientes listarId(int id);
+
+    public List<Clientes> listarPorUsername(String username);
+    public List<Clientes> listarPorUserId(int userId);
 }

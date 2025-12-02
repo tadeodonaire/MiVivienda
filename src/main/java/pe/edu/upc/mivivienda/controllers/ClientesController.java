@@ -49,4 +49,17 @@ public class ClientesController {
         ClientesDTO dto = m.map(cS.listarId(id), ClientesDTO.class);
         return dto;
     }
+
+    // /clientes/mios -> trae clientes del username autenticado
+    @GetMapping("/mios")
+    public List<Clientes> misClientes(org.springframework.security.core.Authentication auth) {
+        String username = auth.getName();               // p.ej. "Consultor"
+        return cS.listarPorUsername(username);
+    }
+
+    // Útil si quieres listar por userId explícito
+    @GetMapping("/por-usuario/{userId}")
+    public List<Clientes> porUsuario(@PathVariable int userId) {
+        return cS.listarPorUserId(userId);
+    }
 }

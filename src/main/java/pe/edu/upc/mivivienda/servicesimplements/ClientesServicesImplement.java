@@ -39,4 +39,14 @@ public class ClientesServicesImplement implements IClientesService {
     public Clientes listarId(int id) {
         return cR.findById(id).orElse(new Clientes());
     }
+
+    @Override
+    public List<Clientes> listarPorUsername(String username) {
+        return cR.findAllByUsuarioUsernameNative(username);
+    }
+
+    @Override
+    public List<Clientes> listarPorUserId(int userId) {
+        return cR.findAllByUsuarioIdNative(userId);
+    }
 }
