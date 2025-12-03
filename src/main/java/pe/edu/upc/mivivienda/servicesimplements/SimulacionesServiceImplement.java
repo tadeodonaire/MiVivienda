@@ -52,6 +52,7 @@ public class SimulacionesServiceImplement implements ISimulacionesService {
         sR.deleteById(id);
     }
 
+
     @Override
     public SimulacionConCronogramaResponse crearConCronograma(SimulacionRequest req) {
         // 1) Traer FKs y validar
