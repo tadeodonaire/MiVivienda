@@ -4,6 +4,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pe.edu.upc.mivivienda.dtos.SimulacionConCronogramaResponse;
 import pe.edu.upc.mivivienda.dtos.SimulacionRequest;
 import pe.edu.upc.mivivienda.dtos.SimulacionesDTO;
 import pe.edu.upc.mivivienda.entities.Simulaciones;
@@ -52,9 +53,16 @@ public class SimulacionesController {
         return dto;
     }
 
-    @PostMapping("/crearCronograma")
-    public ResponseEntity<Simulaciones> crear(@RequestBody SimulacionRequest req) {
-        Simulaciones s = sS.crearConCronograma(req);
-        return ResponseEntity.ok(s);
+    // NUEVA firma: devuelve simulación + cronograma calculado, sin guardar cronograma en BD
+    @PostMapping("/crear")
+    public ResponseEntity<SimulacionConCronogramaResponse> crear(@RequestBody SimulacionRequest req) {
+        SimulacionConCronogramaResponse resp = sS.crearConCronograma(req);
+        return ResponseEntity.ok(resp);
+    }
+
+    // SimulacionesController.java
+    @GetMapping("/simulaciones/{id}/hoja")
+    public SimulacionConCronogramaResponse hoja(@PathVariable int id){
+        return sS.recalcularHoja(id); // usa la misma lógica de crearConCronograma
     }
 }

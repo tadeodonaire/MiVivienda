@@ -25,7 +25,7 @@ public class SimulacionesDTO {
     private Entidades_financieras entidades_financieras_entidadFinanciera_id;
     private String tipoTasa; // "TEA"
     private double valorTasa; // TEA normalizada (fracción)
-    private double cuotaFija; // calculada método francés, opcional guardar
+    private double cuotaFija; // calculada método francés
     private Boolean bonoAplica;
     private String bonoTipo;
     private double bonoMonto;
