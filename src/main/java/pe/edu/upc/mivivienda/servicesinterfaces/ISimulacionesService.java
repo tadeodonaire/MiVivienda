@@ -18,4 +18,5 @@ public interface ISimulacionesService {
     public Simulaciones listarId(int id);
     //Simulaciones por usuario
     Simulaciones crearConCronograma(SimulacionRequest req);
+
 }
