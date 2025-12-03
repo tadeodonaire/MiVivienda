@@ -52,9 +52,11 @@ public class SimulacionesController {
         return dto;
     }
 
-    @PostMapping("/crearCronograma")
-    public ResponseEntity<Simulaciones> crear(@RequestBody SimulacionRequest req) {
-        Simulaciones s = sS.crearConCronograma(req);
-        return ResponseEntity.ok(s);
+    @PostMapping("/crear")
+    public ResponseEntity<SimulacionesDTO> crear(@RequestBody SimulacionRequest req) {
+        Simulaciones sim = sS.crearConCronograma(req);
+        var mapper = new ModelMapper();
+        SimulacionesDTO dto = mapper.map(sim, SimulacionesDTO.class);
+        return ResponseEntity.ok(dto);
     }
 }
