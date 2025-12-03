@@ -13,6 +13,7 @@ public class Simulacion_CronogramaDTO {
     private double seguroDesgravamen;
     private double seguroInmueble;
     private double saldoFinal;
+    private double cuotaTotal;
     private Simulaciones simulaciones_simulacion_id;
 
     public int getSimulacionCronograma_id() {
@@ -93,6 +94,14 @@ public class Simulacion_CronogramaDTO {
 
     public void setSaldoFinal(double saldoFinal) {
         this.saldoFinal = saldoFinal;
+    }
+
+    public double getCuotaTotal() {
+        return cuotaTotal;
+    }
+
+    public void setCuotaTotal(double cuotaTotal) {
+        this.cuotaTotal = cuotaTotal;
     }
 
     public Simulaciones getSimulaciones_simulacion_id() {

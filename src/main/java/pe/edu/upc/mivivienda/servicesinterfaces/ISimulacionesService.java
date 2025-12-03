@@ -1,6 +1,7 @@
 package pe.edu.upc.mivivienda.servicesinterfaces;
 
 import pe.edu.upc.mivivienda.dtos.SimulacionRequest;
+import pe.edu.upc.mivivienda.dtos.SimulacionConCronogramaResponse;
 import pe.edu.upc.mivivienda.entities.Simulaciones;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public interface ISimulacionesService {
     public void delete(int id);
     //ListarId
     public Simulaciones listarId(int id);
-    //Simulaciones por usuario
-    Simulaciones crearConCronograma(SimulacionRequest req);
+    // Simulaciones por usuario
+    SimulacionConCronogramaResponse crearConCronograma(SimulacionRequest req);
+    SimulacionConCronogramaResponse recalcularHoja(int id);
 }
