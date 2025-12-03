@@ -61,8 +61,8 @@ public class SimulacionesController {
     }
 
     // SimulacionesController.java
-    @GetMapping("/simulaciones/{id}/hoja")
-    public SimulacionConCronogramaResponse hoja(@PathVariable int id){
-        return sS.recalcularHoja(id); // usa la misma lógica de crearConCronograma
+    @GetMapping("/{id}/hoja")
+    public ResponseEntity<SimulacionConCronogramaResponse> getHoja(@PathVariable int id) {
+        return ResponseEntity.ok(sS.recalcularHoja(id));
     }
 }

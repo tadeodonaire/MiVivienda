@@ -12,6 +12,9 @@ import java.util.Optional;
 
 @Service
 public class SimulacionesServiceImplement implements ISimulacionesService {
+    private static final java.util.Set<String> TIPOS
+            = java.util.Set.of("INICIAL","RECURRENTE");
+
     @Autowired
     private ISimulacionesRepository sR;
     @Autowired
@@ -52,7 +55,6 @@ public class SimulacionesServiceImplement implements ISimulacionesService {
         sR.deleteById(id);
     }
 
-
     @Override
     public SimulacionConCronogramaResponse crearConCronograma(SimulacionRequest req) {
         // 1) Traer FKs y validar
@@ -72,6 +74,21 @@ public class SimulacionesServiceImplement implements ISimulacionesService {
         int m = req.frecuenciaPago();           // 12, 6, etc.
         int n = req.tiempoAnios() * m;
         double i = Math.pow(1.0 + tea, 1.0 / m) - 1.0; // tasa efectiva por periodo
+// Para prorrateos de costos recurrentes
+        double mesesPorPeriodo = 12.0 / m;
+
+// === Costos adicionales del REQUEST (aún no persisto, pero los uso para el cálculo) ===
+        double sumaInicial = 0.0;      // aumenta P
+        double costoRecPeriodo = 0.0;  // suma al flujo de cada periodo
+
+        if (req.costos() != null) {
+            for (Costes_adicionalesDTO c : req.costos()) {
+                String tipo = (c.getTipo() == null ? "INICIAL" : c.getTipo().toUpperCase());
+                double v = round2(c.getValor());
+                if ("INICIAL".equals(tipo)) sumaInicial += v;
+                else /* RECURRENTE */      costoRecPeriodo += v; // por periodo, sin prorrateos
+            }
+        }
 
         // 3) Bono (opcional)
         Bonos_reglas regla = null;
@@ -91,11 +108,12 @@ public class SimulacionesServiceImplement implements ISimulacionesService {
             }
         }
 
-        // 4) Monto a financiar
+        // 4) Monto a financiar (saldo a financiar – bono + costos INICIALES)
         double P = round2(precioVenta - req.cuotaInicial() - bonoMonto);
         if (P < 0) P = 0;
+        P = round2(P + sumaInicial); // 👈 agrega costos INICIALES a P
 
-        // 5) Cuota base francesa (sin seguros)
+// 5) Cuota base francesa (sin seguros) usando P ya ajustado
         double cuota = (P == 0 || i == 0) ? 0.0 :
                 P * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
         cuota = round2(cuota);
@@ -125,122 +143,130 @@ public class SimulacionesServiceImplement implements ISimulacionesService {
 
         sim = sR.save(sim);
 
-        // 7) Costos adicionales (si llegan) -> estos sí se siguen guardando
+        // 7) Persistir costos (con tipo/periodicidad)
         List<Costes_adicionales> costosGuardados = new java.util.ArrayList<>();
         if (req.costos() != null) {
             for (Costes_adicionalesDTO c : req.costos()) {
+                String tipo = (c.getTipo() == null ? "INICIAL" : c.getTipo().toUpperCase());
+
                 Costes_adicionales ca = new Costes_adicionales();
                 ca.setNombreCosto(c.getNombreCosto());
                 ca.setValor(round2(c.getValor()));
+                ca.setTipo(tipo);               // << nuevo (String)
                 ca.setSimulaciones_simulacion_id(sim);
                 costeRepo.save(ca);
                 costosGuardados.add(ca);
             }
         }
 
-        // 8) Construcción del cronograma SOLO EN MEMORIA (DTOs), NO BD
+        // === 8) Cronograma en memoria ===
         double saldo = P;
 
-        // tasas crudas de la entidad
-        double segDesgMensualPct = ent.getSeguroDesgravamen(); // ej. 0.350 (% mensual)
-        double segBienAnualPct   = ent.getSeguroInmueble();    // ej. 0.304 (% anual)
-        double rawCobertura = ent.getValorCotizacionMax();     // p.ej. 90.0 si existe, 0.0 si no
-        double coberturaMaxPct = (rawCobertura > 0.0 && rawCobertura <= 100.0)
-                ? rawCobertura
-                : 100.0;
+// Tasas/porcentajes
+        double segDesgMensualPct = ent.getSeguroDesgravamen();   // p.ej. 0.045 (% mensual)
+        double segBienAnualPct   = ent.getSeguroInmueble();      // p.ej. 0.400 (% anual)
+        double coberturaMaxPct = 100.0;
 
-        // prorrateos por periodo
-        double mesesPorPeriodo = 12.0 / m; // 1 si mensual, 2 si bimestral, etc.
-        double segDesgPeriodoFrac = (segDesgMensualPct * mesesPorPeriodo) / 100.0;   // fracción por periodo
-        double segBienPeriodoFrac = (segBienAnualPct / m) / 100.0;                   // anual -> por periodo
-
-        // base asegurada para el seguro del bien (sin tasación: usa valor de venta con tope)
-        double baseAsegurada = round2(precioVenta * (coberturaMaxPct / 100.0));
-
-        // >>> AQUÍ: desgravamen fijo por periodo, SIEMPRE igual, calculado sobre P <<<
-        double segDesgFijo = round2(P * segDesgPeriodoFrac);
-
+// Prorrateos por periodo
+        double segDesPerPeriodo  = (segDesgMensualPct * mesesPorPeriodo) / 100.0; // usa el mismo
+        double segBienPerPeriodo = (segBienAnualPct  / m)              / 100.0;
+        double baseAsegurada      = round2(precioVenta * (coberturaMaxPct / 100.0));
+        double comisionPer  = 0.0; // si luego las persistes, léelas de la entidad/req
+        double portesPer    = 0.0;
+        double gastosAdmPer = 0.0;
         List<Simulacion_CronogramaDTO> filas = new java.util.ArrayList<>();
 
-// === Config: desgravamen nivelado (prima plana) ===
-        final boolean NIVELAR_DESGRAVAMEN = true;
-        long baseCents = 0L;   // ← visibles en el loop principal
-        int  residuo   = 0;    // ← visibles en el loop principal
+// ----- Gracia -----
+        int g  = nullSafe(req.cantidadGracia());
+        String tg = (req.tipoGracia() == null ? "SIN_GRACIA" : req.tipoGracia().toUpperCase());
+        if (!"TOTAL".equals(tg) && !"PARCIAL".equals(tg)) g = 0;     // solo cuenta si es TOTAL o PARCIAL
+        g = Math.max(0, Math.min(g, n));                             // clamp
 
-// ---- PRE-PASO: sumar el desgravamen "natural" (sin redondear) y nivelar en céntimos
-        if (NIVELAR_DESGRAVAMEN) {
-            double saldoTmp = P;
-            double totalVar = 0.0;
-            int g = nullSafe(req.cantidadGracia());
-
-            for (int t = 1; t <= n; t++) {
-                double interesTmp = saldoTmp * i;
-                // ¡sin round aquí! sumamos con máxima precisión y recién al final pasamos a céntimos
-                totalVar += (saldoTmp * segDesgPeriodoFrac);
-
-                // avanzar saldoTmp con la misma lógica de gracia que el loop real
-                if ("TOTAL".equalsIgnoreCase(req.tipoGracia()) && t <= g) {
-                    saldoTmp = saldoTmp + interesTmp;       // capitaliza intereses
-                } else if ("PARCIAL".equalsIgnoreCase(req.tipoGracia()) && t <= g) {
-                    // saldoTmp se mantiene (solo intereses)
-                } else {
-                    double cuotaTmp = (t == n) ? (interesTmp + saldoTmp) : cuota; // última cierra saldo
-                    double amortTmp = cuotaTmp - interesTmp;
-                    saldoTmp = saldoTmp - amortTmp;
-                }
-            }
-
-            long totalVarCents = Math.round(totalVar * 100.0); // a céntimos
-            baseCents = totalVarCents / n;                     // parte entera por periodo
-            residuo   = (int)(totalVarCents - baseCents * n);  // céntimos sobrantes a repartir (+1 en las primeras 'residuo')
-        }
-
-// ---- LOOP PRINCIPAL
-        for (int t = 1; t <= n; t++) {
+// 8.1) Periodos en gracia (no cambian n, solo afectan los g primeros)
+        for (int t = 1; t <= g; t++) {
             double saldoIni = round2(saldo);
             double interes  = round2(saldoIni * i);
+            double segDes   = round2(saldoIni * segDesPerPeriodo);        // variable
+            double segInm   = round2(baseAsegurada * segBienPerPeriodo);
 
-            // Desgravamen:
-            double segDesg;
-            if (NIVELAR_DESGRAVAMEN) {
-                long cents = baseCents + (t <= residuo ? 1 : 0); // reparte los sobrantes primero
-                segDesg = cents / 100.0;
-            } else {
-                segDesg = round2(saldoIni * segDesgPeriodoFrac); // modo variable
+            double amort, cuotaIncSeg, saldoFin;
+            if ("TOTAL".equals(tg)) {
+                cuotaIncSeg = 0.0;            // no se paga cuota base
+                amort       = 0.0;
+                saldoFin    = round2(saldoIni + interes);  // capitaliza interés
+            } else { // PARCIAL
+                cuotaIncSeg = interes;         // paga solo interés
+                amort       = 0.0;
+                saldoFin    = saldoIni;        // saldo no cambia
             }
 
-            // Seguro de bien prorrateado por periodo sobre base topeada:
-            double segInm = round2(baseAsegurada * segBienPeriodoFrac);
-
-            double amort, cuotaPeriodo, saldoFin;
-            if ("TOTAL".equalsIgnoreCase(req.tipoGracia()) && t <= nullSafe(req.cantidadGracia())) {
-                amort = 0.0;
-                cuotaPeriodo = 0.0;
-                saldoFin = round2(saldoIni + interes);
-            } else if ("PARCIAL".equalsIgnoreCase(req.tipoGracia()) && t <= nullSafe(req.cantidadGracia())) {
-                amort = 0.0;
-                cuotaPeriodo = interes;
-                saldoFin = saldoIni;
-            } else {
-                cuotaPeriodo = cuota;
-                amort = round2(cuotaPeriodo - interes);
-                if (t == n) { amort = saldoIni; cuotaPeriodo = round2(interes + amort); }
-                saldoFin = round2(saldoIni - amort);
-            }
-
-            double cuotaTotal = round2(cuotaPeriodo + segDesg + segInm);
+            double cuotaTotal = round2(cuotaIncSeg + segDes + segInm);
+            double flujo      = round2(cuotaIncSeg + segDes + segInm + costoRecPeriodo);
 
             Simulacion_CronogramaDTO dto = new Simulacion_CronogramaDTO();
             dto.setPeriodo(t);
             dto.setSaldoInicial(saldoIni);
             dto.setSaldoInicialIndexado(saldoIni);
             dto.setInteres(interes);
-            dto.setCuota(cuotaPeriodo);
+            dto.setCuota(cuotaIncSeg);        // *** "Cuota (inc SegDes)" en gracia es 0 o interés
             dto.setAmortizacion(amort);
-            dto.setSeguroDesgravamen(segDesg);
+            dto.setSeguroDesgravamen(segDes);
             dto.setSeguroInmueble(segInm);
             dto.setSaldoFinal(saldoFin);
             dto.setCuotaTotal(cuotaTotal);
+            dto.setFlujo(flujo);                 // ← NUEVO
+            dto.setSimulaciones_simulacion_id(sim);
+            filas.add(dto);
+
+            saldo = saldoFin;
+        }
+
+// --- 8.2) Recalcular CUOTA CONSTANTE (Interbank) para los periodos restantes ---
+        int nRest = n - g;
+        double r = i + segDesPerPeriodo;           // TEP + % desgravamen por periodo (fracción)
+        double cuotaIncSegConst = 0.0;
+
+        if (nRest > 0) {
+            // saldo al terminar la gracia (mayor si fue TOTAL, igual si fue PARCIAL)
+            double saldoPostGracia = saldo; // 'saldo' viene de la etapa de gracia
+            cuotaIncSegConst = (saldoPostGracia == 0 || r == 0) ? 0.0 :
+                    round2( saldoPostGracia * (r * Math.pow(1 + r, nRest)) / (Math.pow(1 + r, nRest) - 1) );
+        }
+
+// --- 8.3) Periodos normales con cuota CONSTANTE (inc. seg. desgravamen) ---
+        for (int k = 1; k <= nRest; k++) {
+            int t = g + k;
+
+            double saldoIni = round2(saldo);
+            double interes  = round2(saldoIni * i);
+            double segDes   = round2(saldoIni * segDesPerPeriodo);     // variable (sobre saldo)
+            double segInm   = round2(baseAsegurada * segBienPerPeriodo);
+
+            double cuotaPeriodoIncSeg = cuotaIncSegConst;
+            double amort = round2(cuotaPeriodoIncSeg - interes - segDes);
+
+            // Último periodo: cerrar exacto
+            if (k == nRest) {
+                amort = saldoIni;
+                cuotaPeriodoIncSeg = round2(interes + segDes + amort);
+            }
+
+            double saldoFin   = round2(saldoIni - amort);
+            double cuotaTotal = round2(cuotaPeriodoIncSeg + segInm);
+            double flujo      = round2(cuotaPeriodoIncSeg + segInm + costoRecPeriodo);
+
+            Simulacion_CronogramaDTO dto = new Simulacion_CronogramaDTO();
+            dto.setPeriodo(t);
+            dto.setSaldoInicial(saldoIni);
+            dto.setSaldoInicialIndexado(saldoIni);
+            dto.setInteres(interes);
+            dto.setCuota(cuotaPeriodoIncSeg);      // "Cuota (inc SegDes)" CONSTANTE
+            dto.setAmortizacion(amort);
+            dto.setSeguroDesgravamen(segDes);
+            dto.setSeguroInmueble(segInm);
+            dto.setSaldoFinal(saldoFin);
+            dto.setCuotaTotal(cuotaTotal);
+            dto.setFlujo(flujo);                 // ← NUEVO
             dto.setSimulaciones_simulacion_id(sim);
             filas.add(dto);
 
@@ -322,20 +348,33 @@ public class SimulacionesServiceImplement implements ISimulacionesService {
 
     // SimulacionesServiceImplement.java
     public SimulacionConCronogramaResponse recalcularHoja(int id){
-        var sim = sR.findById(id).orElseThrow(() -> new IllegalArgumentException("Simulación no existe"));
-        // Reconstruye un request con lo guardado y reutiliza tu método:
+        var sim = sR.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Simulación no existe"));
+
+        var costos = costeRepo.findAllBySimulacionId(id); // ← JPQL de arriba
+
+        var costosDTO = costos.stream().map(c -> {
+            var d = new Costes_adicionalesDTO();
+            d.setNombreCosto(c.getNombreCosto());
+            d.setValor(c.getValor());
+            d.setTipo(c.getTipo());           // "INICIAL" | "RECURRENTE"
+            return d;
+        }).toList();
+
         var req = new SimulacionRequest(
                 sim.getPropiedades_inmueble_id().getInmueble_id(),
                 sim.getEntidades_financieras_entidadFinanciera_id().getEntidadFinanciera_id(),
                 sim.getMoneda(), sim.getPrecioVenta(), sim.getCuotaInicial(),
                 sim.getTiempoAnios(), sim.getFrecuenciaPago(), sim.getTipoAnio(),
                 sim.getTipoGracia(), sim.getCantidadGracia(),
-                sim.getBonoAplica(), sim.getBonoTipo(),   // bonoTipo opcional
-                sim.getValorTasa() * 100.0,               // a % si tu request espera %
-                null                                      // costos: en la hoja no hace falta
+                sim.getBonoAplica(), sim.getBonoTipo(),
+                sim.getValorTasa() * 100.0,
+                costosDTO                               // ← incluye costos guardados
         );
-        return crearConCronograma(req); // reutiliza la lógica ya probada
+
+        return crearConCronograma(req);
     }
+
 
 }
 

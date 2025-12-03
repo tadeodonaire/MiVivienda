@@ -1,7 +1,8 @@
 package pe.edu.upc.mivivienda.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "Entidades_financieras")
 public class Entidades_financieras {

@@ -1,5 +1,6 @@
 package pe.edu.upc.mivivienda.dtos;
 
+import jakarta.persistence.Column;
 import pe.edu.upc.mivivienda.entities.Simulaciones;
 
 public class Costes_adicionalesDTO {
@@ -7,7 +8,16 @@ public class Costes_adicionalesDTO {
     private int costesAdicional_id;
     private String nombreCosto;
     private double valor;
+    private String tipo;           // "INICIAL" / "RECURRENTE"
     private Simulaciones simulaciones_simulacion_id;
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
 
     public int getCostesAdicional_id() {
         return costesAdicional_id;

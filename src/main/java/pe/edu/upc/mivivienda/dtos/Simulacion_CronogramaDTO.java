@@ -14,7 +14,16 @@ public class Simulacion_CronogramaDTO {
     private double seguroInmueble;
     private double saldoFinal;
     private double cuotaTotal;
+    private double flujo;
     private Simulaciones simulaciones_simulacion_id;
+
+    public double getFlujo() {
+        return flujo;
+    }
+
+    public void setFlujo(double flujo) {
+        this.flujo = flujo;
+    }
 
     public int getSimulacionCronograma_id() {
         return simulacionCronograma_id;
