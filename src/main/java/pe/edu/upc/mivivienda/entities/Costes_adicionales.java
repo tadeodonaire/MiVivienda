@@ -17,6 +17,9 @@ public class Costes_adicionales {
     @Column(name = "valor", nullable = false)
     private double valor;
 
+    @Column(name = "tipo", nullable = false)
+    private String tipo;           // "INICIAL" / "RECURRENTE"
+
     @JsonIgnore
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "Simulaciones_simulacion_id")
@@ -24,11 +27,20 @@ public class Costes_adicionales {
 
     public Costes_adicionales() {}
 
-    public Costes_adicionales(int costesAdicional_id, String nombreCosto, double valor, Simulaciones simulaciones_simulacion_id) {
+    public Costes_adicionales(int costesAdicional_id, String nombreCosto, double valor, String tipo, Simulaciones simulaciones_simulacion_id) {
         this.costesAdicional_id = costesAdicional_id;
         this.nombreCosto = nombreCosto;
         this.valor = valor;
+        this.tipo = tipo;
         this.simulaciones_simulacion_id = simulaciones_simulacion_id;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
     }
 
     public Simulaciones getSimulaciones_simulacion_id() {
