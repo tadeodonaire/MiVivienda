@@ -15,4 +15,6 @@ public interface IClientesService {
     public void delete(int id);
     //ListarId
     public Clientes listarId(int id);
+    public List<String[]> getVerSimulaciones();
+
 }

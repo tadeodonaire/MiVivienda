@@ -39,4 +39,8 @@ public class ClientesServicesImplement implements IClientesService {
     public Clientes listarId(int id) {
         return cR.findById(id).orElse(new Clientes());
     }
+    @Override
+    public List<String[]> getVerSimulaciones() {
+        return cR.getVerSimulaciones();
+    }
 }
