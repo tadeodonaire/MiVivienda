@@ -80,6 +80,31 @@ public class SimulacionesServiceImplement implements ISimulacionesService {
         double i = Math.pow(1.0 + tea, 1.0 / m) - 1.0; // tasa efectiva por periodo
 
         double mesesPorPeriodo = 12.0 / m;
+// ----- Gracia -----
+// cantidad solicitada en el request (interpretada en MESES)
+        int gMesesSolicitada = nullSafe(req.cantidadGracia());
+        String tg = (req.tipoGracia() == null ? "SIN_GRACIA" : req.tipoGracia().toUpperCase());
+
+// Si no es TOTAL ni PARCIAL, no hay gracia
+        if (!"TOTAL".equals(tg) && !"PARCIAL".equals(tg)) {
+            gMesesSolicitada = 0;
+        }
+
+// 1) Clamp a 0..MAX_MESES_GRACIA (5 meses)
+        int gMeses = Math.max(0, Math.min(gMesesSolicitada, MAX_MESES_GRACIA));
+
+// 2) Convertir MESES -> PERIODOS según frecuencia (m)
+        int gPeriodos = 0;
+        if (gMeses > 0 && mesesPorPeriodo > 0) {
+            // cuántos periodos caben en esos meses
+            gPeriodos = (int) Math.floor(gMeses / mesesPorPeriodo);
+        }
+
+// 3) No puede exceder la vida del crédito
+        gPeriodos = Math.max(0, Math.min(gPeriodos, n));
+
+// 4) Usaremos gPeriodos en el cronograma, pero guardaremos gMeses en la simulación
+
 
         double cokPct = (req.tasaDescuentoAnual() == null ? 25.0 : req.tasaDescuentoAnual());
         double cok = cokPct / 100.0;
@@ -144,7 +169,7 @@ public class SimulacionesServiceImplement implements ISimulacionesService {
         sim.setFrecuenciaPago(m);
         sim.setTipoAnio(req.tipoAnio());
         sim.setTipoGracia(req.tipoGracia());
-        sim.setCantidadGracia(req.cantidadGracia());
+        sim.setCantidadGracia(gMeses);   // ✅ guardamos MESES, ya clampados a 0..5
         sim.setSeguroDesgravamen(ent.getSeguroDesgravamen());
         sim.setSeguroInmueble(ent.getSeguroInmueble());
         sim.setPropiedades_inmueble_id(prop);
@@ -194,21 +219,10 @@ public class SimulacionesServiceImplement implements ISimulacionesService {
         double gastosAdmPer = 0.0;
         List<Simulacion_CronogramaDTO> filas = new java.util.ArrayList<>();
 
-// ----- Gracia -----
-// cantidad solicitada en el request (puede venir en meses/periodos)
-int gSolicitada = nullSafe(req.cantidadGracia());
-String tg = (req.tipoGracia() == null ? "SIN_GRACIA" : req.tipoGracia().toUpperCase());
 
-// Si no es TOTAL ni PARCIAL, no hay gracia
-if (!"TOTAL".equals(tg) && !"PARCIAL".equals(tg)) {
-    gSolicitada = 0;
-}
-
-// Aplica el máximo global (por ahora 5 periodos) y que no pase de la vida del crédito
-int g = Math.max(0, Math.min(gSolicitada, Math.min(MAX_MESES_GRACIA, n)));
 
 // 8.1) Periodos en gracia (no cambian n, solo afectan los g primeros)
-for (int t = 1; t <= g; t++) {
+        for (int t = 1; t <= gPeriodos; t++) {
     double saldoIni = round2(saldo);
     double interes  = round2(saldoIni * i);
     double segDes   = round2(saldoIni * segDesPerPeriodo);
@@ -247,7 +261,7 @@ for (int t = 1; t <= g; t++) {
 }
 
 // --- 8.2) Recalcular CUOTA CONSTANTE (Interbank) para los periodos restantes ---
-        int nRest = n - g;
+        int nRest = n - gPeriodos;
         double r = i + segDesPerPeriodo;           // TEP + % desgravamen por periodo (fracción)
         double cuotaIncSegConst = 0.0;
 
@@ -260,7 +274,7 @@ for (int t = 1; t <= g; t++) {
 
 // --- 8.3) Periodos normales con cuota CONSTANTE (inc. seg. desgravamen) ---
         for (int k = 1; k <= nRest; k++) {
-            int t = g + k;
+            int t = gPeriodos + k;
 
             double saldoIni = round2(saldo);
             double interes  = round2(saldoIni * i);
@@ -485,7 +499,4 @@ for (int t = 1; t <= g; t++) {
 
         return bonoRepo.findTechoPropioElegibles(moneda, precio, ingreso);
     }
-
 }
-
-

@@ -75,7 +75,7 @@ public class Simulaciones {
     @Column(name = "bonoAplica")
     private Boolean bonoAplica;
 
-    @Column(name = "bonoTipo", length = 3) // "BBP", etc.
+    @Column(name = "bonoTipo", length = 10)
     private String bonoTipo;
 
     @Column(name = "bonoMonto")
