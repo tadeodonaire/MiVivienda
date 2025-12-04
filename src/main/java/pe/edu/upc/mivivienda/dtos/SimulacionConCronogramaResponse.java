@@ -9,7 +9,24 @@ public class SimulacionConCronogramaResponse {
 
     // --- NUEVOS CAMPOS ---
     private double van;        // en moneda de la simulación
-    private double tirAnual;   // TIR anual en %
+    private Double tirPeriodo;  // % por periodo
+    private Double tcea;        // % anual (TCEA)
+
+    public Double getTirPeriodo() {
+        return tirPeriodo;
+    }
+
+    public void setTirPeriodo(Double tirPeriodo) {
+        this.tirPeriodo = tirPeriodo;
+    }
+
+    public Double getTcea() {
+        return tcea;
+    }
+
+    public void setTcea(Double tcea) {
+        this.tcea = tcea;
+    }
 
     public SimulacionesDTO getSimulacion() {
         return simulacion;
@@ -35,11 +52,4 @@ public class SimulacionConCronogramaResponse {
         this.van = van;
     }
 
-    public double getTirAnual() {
-        return tirAnual;
-    }
-
-    public void setTirAnual(double tirAnual) {
-        this.tirAnual = tirAnual;
-    }
 }

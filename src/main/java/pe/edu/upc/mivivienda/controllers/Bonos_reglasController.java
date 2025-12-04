@@ -7,6 +7,7 @@ import pe.edu.upc.mivivienda.dtos.Bonos_reglasDTO;
 import pe.edu.upc.mivivienda.dtos.Entidades_financierasDTO;
 import pe.edu.upc.mivivienda.entities.Bonos_reglas;
 import pe.edu.upc.mivivienda.servicesinterfaces.IBonos_reglasService;
+import pe.edu.upc.mivivienda.servicesinterfaces.ISimulacionesService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +17,8 @@ import java.util.stream.Collectors;
 public class Bonos_reglasController {
     @Autowired
     private IBonos_reglasService brS;
+
+    private final ModelMapper mapper = new ModelMapper();
 
     @PostMapping
     public void insertar(@RequestBody Bonos_reglasDTO dto) {
@@ -45,9 +48,23 @@ public class Bonos_reglasController {
     }
 
     @GetMapping("/{id}")
-    public Entidades_financierasDTO listarId(@PathVariable("id") Integer id) {
+    public Bonos_reglasDTO listarId(@PathVariable("id") Integer id) {
         ModelMapper m=new ModelMapper();
-        Entidades_financierasDTO dto = m.map(brS.listarId(id), Entidades_financierasDTO.class);
+        Bonos_reglasDTO dto = m.map(brS.listarId(id), Bonos_reglasDTO.class);
         return dto;
+    }
+
+    @Autowired
+    private ISimulacionesService simulacionesService;
+
+    @GetMapping("/techo-propio")
+    public List<Bonos_reglasDTO> evaluarTechoPropio(
+            @RequestParam int propiedadId,
+            @RequestParam String moneda
+    ) {
+        List<Bonos_reglas> bonos = simulacionesService.evaluarTechoPropio(propiedadId, moneda);
+        return bonos.stream()
+                .map(b -> mapper.map(b, Bonos_reglasDTO.class))
+                .collect(Collectors.toList());
     }
 }
