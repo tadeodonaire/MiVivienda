@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import pe.edu.upc.mivivienda.dtos.SimulacionConCronogramaResponse;
 import pe.edu.upc.mivivienda.dtos.SimulacionRequest;
 import pe.edu.upc.mivivienda.dtos.SimulacionesDTO;
+import pe.edu.upc.mivivienda.entities.Bonos_reglas;
 import pe.edu.upc.mivivienda.entities.Simulaciones;
 import pe.edu.upc.mivivienda.servicesinterfaces.ISimulacionesService;
 
@@ -64,5 +65,12 @@ public class SimulacionesController {
     @GetMapping("/{id}/hoja")
     public ResponseEntity<SimulacionConCronogramaResponse> getHoja(@PathVariable int id) {
         return ResponseEntity.ok(sS.recalcularHoja(id));
+    }
+
+    @GetMapping("/techo-propio/opciones")
+    public List<Bonos_reglas> getBonosTechoPropio(
+            @RequestParam int propiedadId,
+            @RequestParam(defaultValue = "PEN") String moneda) {
+        return sS.evaluarTechoPropio(propiedadId, moneda);
     }
 }

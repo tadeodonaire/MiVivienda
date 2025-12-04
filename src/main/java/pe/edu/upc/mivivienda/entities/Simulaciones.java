@@ -65,6 +65,9 @@ public class Simulaciones {
     @Column(name = "valorTasa", nullable = false)
     private double valorTasa; // TEA normalizada (fracción)
 
+    @Column(name = "tasaDescuentoAnual")
+    private Double tasaDescuentoAnual;
+
     @Column(name = "cuotaFija")
     private double cuotaFija; // calculada método francés, opcional guardar
 
@@ -89,7 +92,7 @@ public class Simulaciones {
 
     public Simulaciones() {}
 
-    public Simulaciones(int simulacion_id, double precioVenta, double cuotaInicial, double montoPrestamo, String moneda, Integer tiempoAnios, Integer frecuenciaPago, Integer tipoAnio, String tipoGracia, Integer cantidadGracia, double seguroDesgravamen, double seguroInmueble, Propiedades propiedades_inmueble_id, Entidades_financieras entidades_financieras_entidadFinanciera_id, String tipoTasa, double valorTasa, double cuotaFija, Boolean bonoAplica, String bonoTipo, double bonoMonto, Bonos_reglas bono_Reglas_reglas_id, List<Costes_adicionales> costos) {
+    public Simulaciones(int simulacion_id, double precioVenta, double cuotaInicial, double montoPrestamo, String moneda, Integer tiempoAnios, Integer frecuenciaPago, Integer tipoAnio, String tipoGracia, Integer cantidadGracia, double seguroDesgravamen, double seguroInmueble, Propiedades propiedades_inmueble_id, Entidades_financieras entidades_financieras_entidadFinanciera_id, String tipoTasa, double valorTasa, Double tasaDescuentoAnual, double cuotaFija, Boolean bonoAplica, String bonoTipo, double bonoMonto, Bonos_reglas bono_Reglas_reglas_id, List<Costes_adicionales> costos) {
         this.simulacion_id = simulacion_id;
         this.precioVenta = precioVenta;
         this.cuotaInicial = cuotaInicial;
@@ -106,12 +109,21 @@ public class Simulaciones {
         this.entidades_financieras_entidadFinanciera_id = entidades_financieras_entidadFinanciera_id;
         this.tipoTasa = tipoTasa;
         this.valorTasa = valorTasa;
+        this.tasaDescuentoAnual = tasaDescuentoAnual;
         this.cuotaFija = cuotaFija;
         this.bonoAplica = bonoAplica;
         this.bonoTipo = bonoTipo;
         this.bonoMonto = bonoMonto;
         this.bono_Reglas_reglas_id = bono_Reglas_reglas_id;
         this.costos = costos;
+    }
+
+    public Double getTasaDescuentoAnual() {
+        return tasaDescuentoAnual;
+    }
+
+    public void setTasaDescuentoAnual(Double tasaDescuentoAnual) {
+        this.tasaDescuentoAnual = tasaDescuentoAnual;
     }
 
     public int getSimulacion_id() {
