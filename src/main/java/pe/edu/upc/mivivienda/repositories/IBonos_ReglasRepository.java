@@ -22,4 +22,18 @@ public interface IBonos_ReglasRepository extends JpaRepository<Bonos_reglas, Int
     List<Bonos_reglas> findBands(@Param("nombre") String nombre,
                                  @Param("moneda") String moneda,
                                  @Param("precio") double precio);
+
+    @Query("""
+       SELECT b
+       FROM Bonos_reglas b
+       WHERE b.moneda = :moneda
+         AND :precio BETWEEN b.precioMin AND b.precioMax
+         AND :ingreso <= b.ingresoMax
+         AND b.nombre LIKE 'TP-%'
+       ORDER BY b.monto DESC
+       """)
+    List<Bonos_reglas> findTechoPropioElegibles(
+            @Param("moneda") String moneda,
+            @Param("precio") double precioInmueble,
+            @Param("ingreso") double ingresoMensualHogar);
 }

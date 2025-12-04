@@ -25,12 +25,21 @@ public class SimulacionesDTO {
     private Entidades_financieras entidades_financieras_entidadFinanciera_id;
     private String tipoTasa; // "TEA"
     private double valorTasa; // TEA normalizada (fracción)
+    private Double tasaDescuentoAnual;
     private double cuotaFija; // calculada método francés
     private Boolean bonoAplica;
     private String bonoTipo;
     private double bonoMonto;
     private Bonos_reglas bono_Reglas_reglas_id;
     private List<Costes_adicionales> costos = new ArrayList<>();
+
+    public Double getTasaDescuentoAnual() {
+        return tasaDescuentoAnual;
+    }
+
+    public void setTasaDescuentoAnual(Double tasaDescuentoAnual) {
+        this.tasaDescuentoAnual = tasaDescuentoAnual;
+    }
 
     public int getSimulacion_id() {
         return simulacion_id;
