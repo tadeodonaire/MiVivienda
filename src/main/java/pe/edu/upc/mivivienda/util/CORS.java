@@ -10,8 +10,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE) // Si hay otros filtros de seguridad que podrían bloquear CORS
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class CORS implements Filter {
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
     }
@@ -22,22 +23,18 @@ public class CORS implements Filter {
         HttpServletResponse response = (HttpServletResponse) res;
         HttpServletRequest request = (HttpServletRequest) req;
 
-        String origin = request.getHeader("Origin");
-        if (origin != null && (origin.equals("http://localhost:4200") || origin.equals("https://coffee-accounting-ui.vercel.app"))) {
-            response.setHeader("Access-Control-Allow-Origin", origin);
-            response.setHeader("Access-Control-Allow-Credentials", "true");
-            response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-            response.setHeader("Access-Control-Max-Age", "3600");
-            response.setHeader("Access-Control-Allow-Headers",
-                    "authorization, Content-Type, X-Requested-With, credential, X-XSRF-TOKEN");
-        }
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Methods", "DELETE, GET, OPTIONS, PATCH, POST, PUT");
+        response.setHeader("Access-Control-Max-Age", "3600");
+        response.setHeader("Access-Control-Allow-Headers",
+                "x-requested-with, authorization, Content-Type, Authorization, credential, X-XSRF-TOKEN");
 
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
-            return;
+        } else {
+            chain.doFilter(req, res);
         }
-
-        chain.doFilter(req, res);
+        // chain.doFilter(req, res);
     }
 
     @Override
