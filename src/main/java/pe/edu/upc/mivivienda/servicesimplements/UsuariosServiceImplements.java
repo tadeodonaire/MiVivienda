@@ -1,6 +1,7 @@
 package pe.edu.upc.mivivienda.servicesimplements;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pe.edu.upc.mivivienda.entities.Usuarios;
 import pe.edu.upc.mivivienda.repositories.IUsuariosRepository;
@@ -13,9 +14,12 @@ public class UsuariosServiceImplements implements IUsuariosService {
 
     @Autowired
     private IUsuariosRepository uR;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public void insert(Usuarios usuarios) {
+        usuarios.setPassword(passwordEncoder.encode(usuarios.getPassword()));
         uR.save(usuarios);
     }
 
